@@ -40,16 +40,17 @@ body{font-family:'IM Fell English',Georgia,serif;-webkit-font-smoothing:antialia
 .hero{position:relative;height:100svh;min-height:620px;overflow:hidden;background:var(--haze)}
 .hero img.paint{position:absolute;inset:-6%;width:112%;height:112%;object-fit:cover;object-position:50% 74%;
   filter:blur(14px);transform:scale(1.03);transition:filter 2.4s var(--ease) .2s,transform 3.2s var(--ease) .2s}
-.hero .wash{position:absolute;inset:0;background:linear-gradient(180deg,rgba(251,244,228,.7) 0%,rgba(251,244,228,.25) 42%,rgba(251,244,228,0) 66%)}
+.hero .wash{position:absolute;inset:0;background:linear-gradient(180deg,rgba(251,244,228,.7) 0%,rgba(251,244,228,.42) 40%,rgba(251,244,228,.3) 58%,rgba(251,244,228,0) 80%)}
 .topbar{position:absolute;top:max(22px,env(safe-area-inset-top));left:24px;right:24px;display:flex;justify-content:center;align-items:center;font-size:13px;z-index:2;opacity:0;transition:opacity .4s ease}
 .landed .topbar{opacity:1}
 .topbar .lg{width:60px;height:60px;color:var(--ink)}
-.names{position:absolute;left:0;right:0;top:max(16svh,128px);text-align:center;padding:0 16px;z-index:2}
+.names{position:absolute;left:0;right:0;top:50%;text-align:center;padding:0 16px;z-index:2}
 .names .hm{width:64px;height:64px;color:var(--ink);opacity:0;transition:opacity 1.6s ease .6s;margin-bottom:10px}
 .open .names .hm{opacity:.85}
-.names h1{margin:0;line-height:.72;font-size:clamp(92px,27vw,220px);position:relative;left:-.06em}
+/* the names' ink sits on the centre of the frame, both ways; the date hangs below it */
+.names h1{margin:-.61em 0 0;line-height:.72;font-size:clamp(92px,27vw,min(220px,30svh));position:relative;left:-.06em}
 .names h1 span{display:block;opacity:0;transform:translateY(22px);filter:blur(6px);transition:all 1.8s var(--ease)}
-.names h1 .y{font-family:'IM Fell English',serif;font-style:italic;font-size:.5em;line-height:.9;margin:-.22em 0 -.3em;position:relative;z-index:1}
+.names h1 .y{font-family:'IM Fell English',serif;font-style:italic;font-size:.5em;line-height:.9;margin:-.22em 0 -.3em;position:relative;left:.12em;z-index:1}
 .names h1 .l1{transition-delay:1s}.names h1 .y{transition-delay:1.3s}.names h1 .l2{transition-delay:1.5s}
 .names .date{margin:clamp(30px,8vw,54px) 0 0;opacity:0;transition:opacity 1.6s ease 2s}
 .names .date b{display:block;font-weight:400;font-size:clamp(21px,6.8vw,42px);letter-spacing:.14em;line-height:1.2;-webkit-text-stroke:.4px currentColor}
