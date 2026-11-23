@@ -72,6 +72,12 @@ body{font-family:'IM Fell English',Georgia,serif;-webkit-font-smoothing:antialia
 
 .lead2{margin:26px auto 0;max-width:27em;font-size:clamp(19px,4.9vw,24px);line-height:1.5}
 
+.mono3d{position:relative;width:min(66vw,280px);aspect-ratio:1;margin:18px auto -10px}
+.mono3d canvas{position:absolute;inset:0;width:100%;height:100%;display:block;opacity:0;transition:opacity .9s ease}
+.mono3d.on canvas{opacity:1}
+.intro .mono3d .lg{position:absolute;inset:36%;width:auto;height:auto;margin:0;color:var(--disc);transition:opacity .6s ease}
+.mono3d.on .lg{opacity:0}
+
 /* ---------- Story pacing: each part arrives as you reach it ---------- */
 .rv{opacity:0;transform:translateY(26px);filter:blur(5px);transition:opacity 1.3s var(--ease),transform 1.5s var(--ease),filter 1.3s var(--ease);transition-delay:var(--d,0s)}
 .rv.in{opacity:1;transform:none;filter:none}
@@ -164,7 +170,7 @@ footer p{margin:30px 0 0;font-size:13px}
     <p class="sc rv">Con la bendición de Dios<br>y el cariño de nuestras familias</p>
     <p class="lead rv" style="--d:.25s">Hoy elegimos caminar juntos.</p>
     <p class="lead2 rv" style="--d:.45s">Con la alegría de compartir este amor y la fe puesta en Dios, queremos invitaros a celebrar nuestra unión matrimonial.</p>
-    <i class="lg rv" style="--d:.55s" aria-hidden="true"></i>
+    <div class="mono3d rv" id="mono3d" style="--d:.55s" aria-hidden="true"><i class="lg"></i><canvas id="m3d"></canvas></div>
   </section>
 
   <section class="poster">
@@ -226,6 +232,23 @@ footer p{margin:30px 0 0;font-size:13px}
   var b = document.body, ov = document.getElementById('intro');
   var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   var done = false, opened = false;
+  var LGURL = (typeof LG_SRC !== 'undefined') ? LG_SRC : 'lg.png';
+
+  // the small gold medallion that turns under the invitation text
+  var coin = document.getElementById('coin');
+  if (coin) {
+    var ci = new Image();
+    ci.onload = function () {
+      try {
+        var cc = document.createElement('canvas'); cc.width = cc.height = 360;
+        drawSeal(ci, cc, true);
+        var u = 'url(' + cc.toDataURL() + ')';
+        [].forEach.call(coin.querySelectorAll('.cf'), function (f) { f.style.backgroundImage = u; });
+      } catch (e) { /* the plain gold disc stays */ }
+    };
+    ci.src = LGURL;
+  }
+
   function finish() {           // no envelope at all: reduced motion, or something failed
     if (done) return; done = true;
     b.classList.add('open', 'landed', 'noenv'); ov.remove();
@@ -294,8 +317,8 @@ footer p{margin:30px 0 0;font-size:13px}
   var rt; window.addEventListener('resize', function () { if (done) return; clearTimeout(rt); rt = setTimeout(function () { paint(); onScroll(); }, 150); });
 
   /* ---------- the wax seal: a height field, lit like real wax ---------- */
-  function drawSeal(img) {
-    var c = document.getElementById('seal'), S = c.width, x = c.getContext('2d'), N = S * S, i, j, k;
+  function drawSeal(img, c, round) {
+    var S = c.width, x = c.getContext('2d'), N = S * S, i, j, k;
     var R0 = S * .43, Rd = S * .295, cx = S / 2, cy = S / 2;
     // monogram relief
     var mc = document.createElement('canvas'); mc.width = mc.height = S;
@@ -304,11 +327,12 @@ footer p{margin:30px 0 0;font-size:13px}
     for (j = 0; j < S; j++) for (i = 0; i < S; i++) {
       k = j * S + i;
       var dx = i - cx, dy = j - cy, r = Math.sqrt(dx * dx + dy * dy), a = Math.atan2(dy, dx);
-      var Rb = R0 * (1 + .05 * Math.sin(3 * a + 1) + .034 * Math.sin(5 * a + 2.3) + .02 * Math.sin(8 * a + .5) + .012 * Math.sin(13 * a + 4));
+      var Rb = round ? R0 : R0 * (1 + .05 * Math.sin(3 * a + 1) + .034 * Math.sin(5 * a + 2.3) + .02 * Math.sin(8 * a + .5) + .012 * Math.sin(13 * a + 4));
       var t = r / Rb; if (t >= 1.02) { A[k] = 0; continue; }
       A[k] = Math.min(1, Math.max(0, (Rb - r) / 1.6));
       var tt = Math.min(1, t), h = .62 * Math.sqrt(1 - Math.pow(tt, 7));                     // soft, pillowy rim
-      h += .035 * Math.sin(a * 4 + r * .05) * tt + .02 * Math.sin(a * 9 + 2);                // poured-wax unevenness
+      if (round) { if (tt > .8) h += .03 * Math.sin(a * 72) * Math.min(1, (tt - .8) / .06); }  // a reeded rim, like a coin
+      else h += .035 * Math.sin(a * 4 + r * .05) * tt + .02 * Math.sin(a * 9 + 2);           // poured-wax unevenness
       var sIn = Math.min(1, Math.max(0, (Rd - r) / (S * .03))); sIn = sIn * sIn * (3 - 2 * sIn);
       h = h * (1 - sIn) + .30 * sIn;                                                          // the pressed floor
       var q = (r - (Rd - S * .045)) / (S * .011); h += .085 * Math.exp(-q * q);              // a fine raised ring
@@ -378,10 +402,151 @@ footer p{margin:30px 0 0;font-size:13px}
   try {
     paint(); frame();
     var img = new Image();
-    img.onload = function () { try { drawSeal(img); } catch (e) { /* the seal is decoration; the tap still works */ } };
-    img.src = LG_SRC;
+    img.onload = function () { try { drawSeal(img, document.getElementById('seal'), false); } catch (e) { /* the seal is decoration; the tap still works */ } };
+    img.src = LGURL;
   } catch (e) { finish(); }
 })();
+</script>
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+
+// The LG monogram as a small inflated piece of gold, turning slowly and reflecting the painting.
+const wrap = document.getElementById('mono3d'), cv = document.getElementById('m3d');
+const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+const load = (src) => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
+
+if (wrap && cv) build().catch((e) => console.error(e));
+
+async function build() {
+  const heroEl = document.querySelector('#inicio img.paint');
+  const [lg, hero] = await Promise.all([load(window.LG_SRC || 'lg.png'), load(heroEl ? heroEl.currentSrc || heroEl.src : 'hero.jpg')]);
+
+  /* ---------- 1. the monogram as a mask ---------- */
+  const G = 360, pad = Math.round(G * .13);
+  const mc = document.createElement('canvas'); mc.width = mc.height = G;
+  const mx = mc.getContext('2d'); mx.drawImage(lg, pad, pad, G - 2 * pad, G - 2 * pad);
+  const al = mx.getImageData(0, 0, G, G).data, N = G * G;
+  const ink = new Uint8Array(N);
+  for (let k = 0; k < N; k++) ink[k] = al[k * 4 + 3] > 110 ? 1 : 0;
+
+  // distance (in cells) to the nearest cell where `test` is true: two-pass chamfer
+  function dist(test) {
+    const d = new Float32Array(N), BIG = 1e6, a = 1, b = 1.4142;
+    for (let k = 0; k < N; k++) d[k] = test(k) ? 0 : BIG;
+    for (let j = 0; j < G; j++) for (let i = 0; i < G; i++) {
+      const k = j * G + i; let v = d[k];
+      if (i > 0) v = Math.min(v, d[k - 1] + a);
+      if (j > 0) { v = Math.min(v, d[k - G] + a); if (i > 0) v = Math.min(v, d[k - G - 1] + b); if (i < G - 1) v = Math.min(v, d[k - G + 1] + b); }
+      d[k] = v;
+    }
+    for (let j = G - 1; j >= 0; j--) for (let i = G - 1; i >= 0; i--) {
+      const k = j * G + i; let v = d[k];
+      if (i < G - 1) v = Math.min(v, d[k + 1] + a);
+      if (j < G - 1) { v = Math.min(v, d[k + G] + a); if (i < G - 1) v = Math.min(v, d[k + G + 1] + b); if (i > 0) v = Math.min(v, d[k + G - 1] + b); }
+      d[k] = v;
+    }
+    return d;
+  }
+  const dOut = dist((k) => ink[k] === 1), dInk = dist((k) => ink[k] === 0);
+
+  /* ---------- 2. inflate it: a round, pillowy cross-section ---------- */
+  const GROW = G * .025, R = GROW + G * .012;          // how far the line swells, and its half thickness
+  let Z = new Float32Array(N);
+  for (let k = 0; k < N; k++) {
+    const dIn = ink[k] ? GROW + dInk[k] : GROW - dOut[k];
+    if (dIn <= 0) { Z[k] = -1; continue; }
+    const t = Math.min(1, dIn / R); Z[k] = R * Math.sqrt(1 - (1 - t) * (1 - t));
+  }
+  for (let pass = 0; pass < 3; pass++) {                 // soften the facets
+    const T = new Float32Array(N);
+    for (let j = 1; j < G - 1; j++) for (let i = 1; i < G - 1; i++) {
+      const k = j * G + i; if (Z[k] < 0) { T[k] = -1; continue; }
+      let s = 0, n = 0;
+      for (let q = -1; q <= 1; q++) for (let p = -1; p <= 1; p++) { const v = Z[k + q * G + p]; if (v >= 0) { s += v; n++; } }
+      T[k] = s / n;
+    }
+    Z = T;
+  }
+
+  /* ---------- 3. mesh: a front and a back that meet at the rim ---------- */
+  const id = new Int32Array(N).fill(-1), pos = [], idx = [];
+  const inside = (i, j) => i >= 0 && j >= 0 && i < G && j < G && Z[j * G + i] >= 0;
+  let nv = 0;
+  const isRim = new Uint8Array(N), PX = new Float32Array(N), PY = new Float32Array(N);
+  for (let j = 0; j < G; j++) for (let i = 0; i < G; i++) {
+    const k = j * G + i; PX[k] = i; PY[k] = j;
+    if (inside(i, j) && (!inside(i - 1, j) || !inside(i + 1, j) || !inside(i, j - 1) || !inside(i, j + 1))) isRim[k] = 1;
+  }
+  for (let pass = 0; pass < 4; pass++) {                 // round off the staircase along the outline
+    const NX = PX.slice(), NY = PY.slice();
+    for (let j = 1; j < G - 1; j++) for (let i = 1; i < G - 1; i++) {
+      const k = j * G + i; if (!isRim[k]) continue;
+      let sx = 0, sy = 0, n = 0;
+      for (let q = -1; q <= 1; q++) for (let p = -1; p <= 1; p++) { const m = k + q * G + p; if (isRim[m]) { sx += PX[m]; sy += PY[m]; n++; } }
+      NX[k] = sx / n; NY[k] = sy / n;
+    }
+    PX.set(NX); PY.set(NY);
+  }
+  for (let j = 0; j < G; j++) for (let i = 0; i < G; i++) {
+    if (!inside(i, j)) continue;
+    const k = j * G + i;
+    const x = (PX[k] / (G - 1) - .5) * 2, y = (.5 - PY[k] / (G - 1)) * 2, z = isRim[k] ? 0 : Z[k] * 2 / G * 1.15;
+    id[k] = nv; pos.push(x, y, z, x, y, -z); nv++;      // vertex 2n = front, 2n+1 = back
+  }
+  for (let j = 0; j < G - 1; j++) for (let i = 0; i < G - 1; i++) {
+    const a = id[j * G + i], b = id[j * G + i + 1], c = id[(j + 1) * G + i], d = id[(j + 1) * G + i + 1];
+    if (a < 0 || b < 0 || c < 0 || d < 0) continue;
+    idx.push(2 * a, 2 * c, 2 * b, 2 * b, 2 * c, 2 * d);                                  // front
+    idx.push(2 * a + 1, 2 * b + 1, 2 * c + 1, 2 * b + 1, 2 * d + 1, 2 * c + 1);          // back
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  geo.setIndex(idx); geo.computeVertexNormals();
+
+  /* ---------- 4. gold that reflects the painting ---------- */
+  const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.12;
+
+  const ec = document.createElement('canvas'); ec.width = 1024; ec.height = 512;
+  const ex = ec.getContext('2d');
+  ex.drawImage(hero, 0, 0, 512, 512); ex.save(); ex.translate(1024, 0); ex.scale(-1, 1); ex.drawImage(hero, 0, 0, 512, 512); ex.restore();
+  const sky = ex.createLinearGradient(0, 0, 0, 512);
+  sky.addColorStop(0, 'rgba(255,252,240,.75)'); sky.addColorStop(.35, 'rgba(255,250,235,.15)'); sky.addColorStop(.62, 'rgba(120,60,15,.12)'); sky.addColorStop(1, 'rgba(70,30,8,.72)');
+  ex.fillStyle = sky; ex.fillRect(0, 0, 1024, 512);
+  [[250, 110, 120], [760, 90, 90], [520, 60, 70]].forEach(([x, y, r]) => {            // a few suns, for the glints
+    const g = ex.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(.35, 'rgba(255,255,255,.85)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+    ex.fillStyle = g; ex.fillRect(x - r, y - r, 2 * r, 2 * r);
+  });
+  const envTex = new THREE.CanvasTexture(ec); envTex.mapping = THREE.EquirectangularReflectionMapping; envTex.colorSpace = THREE.SRGBColorSpace;
+  const pm = new THREE.PMREMGenerator(renderer), env = pm.fromEquirectangular(envTex).texture; pm.dispose(); envTex.dispose();
+
+  const scene = new THREE.Scene(); scene.environment = env;
+  const camera = new THREE.PerspectiveCamera(26, 1, .1, 20); camera.position.set(0, 0, 4.6);
+  const mesh = new THREE.Mesh(geo, new THREE.MeshPhysicalMaterial({ color: 0xe6ad42, metalness: 1, roughness: .13, envMapIntensity: 1.3, clearcoat: .6, clearcoatRoughness: .2 }));
+  scene.add(mesh);
+  const key = new THREE.DirectionalLight(0xfff4dc, 2.2); key.position.set(-2, 3, 4); scene.add(key);
+
+  function size() { const w = cv.clientWidth, h = cv.clientHeight; if (w && h) renderer.setSize(w, h, false); }
+  size(); window.addEventListener('resize', size);
+
+  let visible = false, raf = 0, t0 = performance.now();
+  function frame(now) {
+    raf = 0; if (!visible) return;
+    const t = (now - t0) / 1000;
+    mesh.rotation.y = t * .75; mesh.rotation.x = Math.sin(t * .5) * .1; mesh.position.y = Math.sin(t * .8) * .04;
+    renderer.render(scene, camera);
+    raf = requestAnimationFrame(frame);
+  }
+  if (reduce) { mesh.rotation.y = -.45; renderer.render(scene, camera); }
+  else if ('IntersectionObserver' in window) {
+    new IntersectionObserver((en) => { visible = en[0].isIntersecting; if (visible && !raf) raf = requestAnimationFrame(frame); }, { rootMargin: '80px' }).observe(wrap);
+  } else { visible = true; raf = requestAnimationFrame(frame); }
+  renderer.render(scene, camera);
+  wrap.classList.add('on');
+}
 </script>
 </body>
 </html>
