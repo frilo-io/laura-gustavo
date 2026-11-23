@@ -110,7 +110,8 @@ section{padding:104px 24px}
 .facts div{background:var(--paper);padding:34px 26px;text-align:center}
 .facts .sc{font-size:12px;color:var(--disc);margin:0 0 12px}
 .facts .v{margin:0;font-size:25px;line-height:1.25}
-.facts .v em{font-family:'Cormorant Garamond',serif}
+.facts .v b{display:block;font-weight:400;font-size:clamp(40px,11vw,54px);line-height:1.05}
+.facts .v em{display:block;margin-top:8px;font-family:'Cormorant Garamond',serif;font-size:23px}
 .go{text-align:center;margin-top:40px}
 .btn{display:inline-block;padding:17px 38px;border:1px solid var(--ink);border-radius:999px;color:var(--ink);text-decoration:none;font-size:13px;transition:background .3s,color .3s}
 .btn:hover{background:var(--ink);color:var(--paper)}
@@ -137,7 +138,7 @@ footer p{margin:30px 0 0;font-size:13px}
 .bars{position:relative;z-index:1;display:flex;align-items:flex-end;height:min(64svh,600px);margin:70px -8% -34px;
   transform-origin:50% 100%;transform:scaleY(var(--s,.06));filter:blur(clamp(6px,1.15vw,15px));pointer-events:none;will-change:transform}
 .bars i{display:block;flex:1;margin:0 -1.4%;height:var(--h);
-  background:linear-gradient(to top,#2B170B 0%,#8C3F14 13%,#E0702A 29%,#FCAE0F 47%,#FAE09C 63%,#9FD3C7 81%,#FBF4E4 100%)}
+  background:linear-gradient(to top,#F29A1F 0%,#FCAE0F 22%,#FBC653 42%,#FAE09C 60%,#9FD3C7 80%,#FBF4E4 100%)}
 @media (prefers-reduced-motion:reduce){.bars{--s:1!important}}
 
 @media (prefers-reduced-motion:reduce){
@@ -181,9 +182,9 @@ footer p{margin:30px 0 0;font-size:13px}
 
   <section>
     <div class="facts rv">
-      <div><p class="sc">Fecha</p><p class="v">Sábado<br><em>12 de diciembre, 2026</em></p></div>
-      <div><p class="sc">Misa</p><p class="v">20:45<br><em>en punto</em></p></div>
-      <div><p class="sc">Lugar</p><p class="v">Iglesia<br><em>Los Oblatos de María</em></p></div>
+      <div><p class="sc">Fecha</p><p class="v"><b>Sábado</b><em>12 de diciembre, 2026</em></p></div>
+      <div><p class="sc">Misa</p><p class="v"><b>20:45</b><em>en punto</em></p></div>
+      <div><p class="sc">Lugar</p><p class="v"><b>Iglesia</b><em>Los Oblatos de María</em></p></div>
     </div>
     <div class="go rv" style="--d:.3s"><a class="btn sc" href="https://maps.app.goo.gl/NGzEKhBy29xLtY7Y9" target="_blank" rel="noopener">Cómo llegar</a></div>
   </section>
