@@ -79,16 +79,10 @@ body{font-family:'IM Fell English',Georgia,serif;-webkit-font-smoothing:antialia
 .rv.in{opacity:1;transform:none;filter:none}
 
 /* ---------- Closing seal: the letter is sealed again ---------- */
-.fseal{position:relative;width:118px;height:118px;margin:0 auto;display:block}
-.fseal i{position:absolute;display:block}
-.fseal .drip{inset:-5%;background:radial-gradient(circle at 40% 35%,#EBC665,#B5822A 74%);border-radius:47% 53% 44% 56% / 55% 45% 57% 43%;box-shadow:0 10px 22px rgba(176,101,32,.2)}
-.fseal .disc{inset:9%;border-radius:50%;background:radial-gradient(circle at 38% 32%,#F4D887,#D9A441 55%,#B07F27);box-shadow:inset 0 -4px 8px rgba(120,80,20,.3),inset 0 3px 6px rgba(255,244,200,.5)}
-.fseal .m{inset:21%;width:auto;height:auto}
-.fseal .m.sh{color:rgba(110,72,18,.55);transform:translate(1px,1.2px)}
-.fseal .m.hi{color:rgba(255,246,210,.75);transform:translate(-.8px,-.8px)}
-.fseal .m.fa{color:#C4912F}
-.fseal.rv{transform:scale(1.35);filter:blur(6px)}
-.fseal.rv.in{transform:none;filter:none;transition:opacity .9s ease,transform 1.1s cubic-bezier(.3,1.3,.5,1),filter .9s ease}
+.fsealw{display:block;width:140px;height:140px;margin:0 auto}
+.fsealc{display:block;width:100%;height:100%;filter:drop-shadow(0 9px 14px rgba(84,56,22,.28))}
+.fsealw.rv{transform:scale(1.25);filter:blur(6px)}
+.fsealw.rv.in{transform:none;filter:none;transition:opacity .9s ease,transform 1.1s cubic-bezier(.3,1.3,.5,1),filter .9s ease}
 
 /* ---------- Sections ---------- */
 section{padding:104px 24px}
@@ -194,7 +188,7 @@ footer p{margin:30px 0 0;font-size:13px}
 </main>
 
 <footer id="pie">
-  <div class="fc" id="fc"><span class="fseal rv" role="img" aria-label="Sello de lacre con el monograma L G"><i class="drip"></i><i class="disc"></i><i class="lg m sh"></i><i class="lg m hi"></i><i class="lg m fa"></i></span>
+  <div class="fc" id="fc"><span class="fsealw rv"><canvas class="fsealc" id="fseal" width="400" height="400" role="img" aria-label="Sello de lacre con el monograma L G"></canvas></span>
   <p class="sc rv" style="--d:.5s">Laura &amp; Gustavo · 12 · 12 · 26</p>
   </div>
   <div class="bars" id="bars" aria-hidden="true"><i style="--h:55%"></i><i style="--h:69%"></i><i style="--h:82%"></i><i style="--h:91%"></i><i style="--h:100%"></i><i style="--h:91%"></i><i style="--h:82%"></i><i style="--h:69%"></i><i style="--h:55%"></i></div>
@@ -231,19 +225,12 @@ footer p{margin:30px 0 0;font-size:13px}
   var done = false, opened = false;
   var LGURL = (typeof LG_SRC !== 'undefined') ? LG_SRC : 'lg.png';
 
-  // the small gold medallion that turns under the invitation text
-  var coin = document.getElementById('coin');
-  if (coin) {
-    var ci = new Image();
-    ci.onload = function () {
-      try {
-        var cc = document.createElement('canvas'); cc.width = cc.height = 360;
-        drawSeal(ci, cc, true);
-        var u = 'url(' + cc.toDataURL() + ')';
-        [].forEach.call(coin.querySelectorAll('.cf'), function (f) { f.style.backgroundImage = u; });
-      } catch (e) { /* the plain gold disc stays */ }
-    };
-    ci.src = LGURL;
+  // the footer carries the very same wax seal as the envelope
+  var fseal = document.getElementById('fseal');
+  if (fseal) {
+    var fi = new Image();
+    fi.onload = function () { try { drawSeal(fi, fseal, false); } catch (e) { /* decoration only */ } };
+    fi.src = LGURL;
   }
 
   function finish() {           // no envelope at all: reduced motion, or something failed
